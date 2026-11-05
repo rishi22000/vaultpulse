@@ -33,3 +33,4 @@ Thank you for your interest in contributing to **VaultPulse**, an open-source pr
 - Maintain clean, robust code with zero unnecessary dependencies.
 - Follow PEP 8 guidelines.
 - Always include automated test coverage for new endpoints.
+

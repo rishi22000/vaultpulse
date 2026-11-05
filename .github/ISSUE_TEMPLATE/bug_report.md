@@ -23,3 +23,4 @@ A clear and concise description of what you expected to happen.
  - OS: [e.g. Ubuntu 24.04 VPS, macOS]
  - Python Version: [e.g. 3.12]
  - Deployment: [Docker / Bare Metal]
+
