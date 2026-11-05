@@ -16,6 +16,7 @@
 
   <p align="center">
     <img src="https://img.shields.io/badge/Author-Neelbyte_Websolution-emerald?style=flat-square" alt="Author">
+    <img src="https://img.shields.io/badge/CI_Tests-11%2F11_Passing-emerald?style=flat-square" alt="Tests">
     <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License">
     <img src="https://img.shields.io/badge/Architecture-SQLite_WAL-blue?style=flat-square" alt="DB">
     <img src="https://img.shields.io/badge/Docker-Ready-cyan?style=flat-square" alt="Docker">
@@ -61,7 +62,7 @@ Deploying your own instance of VaultPulse takes under 60 seconds on Hostinger:
 3. Connect via SSH and run:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/vaultpulse.git
+git clone https://github.com/rishi22000/vaultpulse.git
 cd vaultpulse
 chmod +x hostinger-deploy.sh
 ./hostinger-deploy.sh
@@ -75,7 +76,7 @@ Your instance will immediately start at `http://YOUR_VPS_IP:8000`.
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/YOUR_USERNAME/vaultpulse.git
+git clone https://github.com/rishi22000/vaultpulse.git
 cd vaultpulse
 
 # 2. Setup Virtual Environment
@@ -94,7 +95,7 @@ Open `http://localhost:8000` in your browser.
 ### Author & Credits
 
 Designed, engineered, and maintained by **Neelbyte Websolution**.
-* Website / Inquiries: [Neelbyte Websolution](https://github.com/YOUR_USERNAME)
+* Website / Inquiries: [Neelbyte Websolution](https://github.com/rishi22000)
 * Purpose: Production-grade self-hosted software built for high reliability, zero data leakage, and seamless 1-click cloud deployment.
 
 ---
