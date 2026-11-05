@@ -74,7 +74,13 @@ def run_tests():
     assert hb_res.json().get("status") == "ok"
     print("  ✅ [9/11] Real-Time Heartbeat Slide Tracking: PASSED")
 
-    # 10. Deliverable Unlock & File Download
+    # 10. Deliverable Unlock & File Download (ensure test quota available)
+    from app.database import get_db
+    conn = get_db()
+    conn.execute("UPDATE deliverables SET downloads_count = 1, status = 'active' WHERE id = 'dl_brand_assets_q4'")
+    conn.commit()
+    conn.close()
+
     dl_page = client.get("/d/dl_brand_assets_q4")
     assert dl_page.status_code == 200
     assert "Enter Access Passcode" in dl_page.text
