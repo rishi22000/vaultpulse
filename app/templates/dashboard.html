@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - VaultPulse Intelligence{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+  <!-- Welcome / Header Banner -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+        <span>Executive Intelligence</span>
+        <span class="text-xs px-2.5 py-0.5 rounded-full font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          HOSTINGER VPS NODE
+        </span>
+      </h1>
+      <p class="text-sm text-slate-400 mt-1">
+        Monitor real-time slide engagement, secure client deliverables, and proposal conversions.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <button onclick="toggleModal('upload-modal')" class="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-medium bg-surface-800 hover:bg-surface-700 text-slate-200 border border-surface-700 transition">
+        <svg class="w-4 h-4 mr-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+        </svg>
+        Upload Deck
+      </button>
+      <a href="/deliverables?action=new" class="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-medium bg-surface-800 hover:bg-surface-700 text-slate-200 border border-surface-700 transition">
+        <svg class="w-4 h-4 mr-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        New Asset Locker
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric KPI Grid (6 Cards) -->
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    
+    <!-- 1. Active Decks -->
+    <div class="vp-metric-card p-4">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-medium uppercase tracking-wider">Tracked Decks</span>
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold font-mono text-white">{{ kpi.total_docs }}</div>
+      <div class="text-[11px] text-emerald-400/90 mt-1 font-medium">DocSend Alternative</div>
+    </div>
+
+    <!-- 2. Client Views -->
+    <div class="vp-metric-card p-4">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-medium uppercase tracking-wider">Total Views</span>
+        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold font-mono text-white">{{ kpi.total_views }}</div>
+      <div class="text-[11px] text-cyan-400/90 mt-1 font-medium">Page sessions logged</div>
+    </div>
+
+    <!-- 3. Avg Reading Time -->
+    <div class="vp-metric-card p-4">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-medium uppercase tracking-wider">Avg. Duration</span>
+        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold font-mono text-white">{{ kpi.avg_duration | format_duration }}</div>
+      <div class="text-[11px] text-blue-400/90 mt-1 font-medium">Per visitor session</div>
+    </div>
+
+    <!-- 4. Asset Deliveries -->
+    <div class="vp-metric-card p-4">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-medium uppercase tracking-wider">Asset Lockers</span>
+        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold font-mono text-white">{{ kpi.active_deliverables }}</div>
+      <div class="text-[11px] text-purple-400/90 mt-1 font-medium">WeTransfer Alternative</div>
+    </div>
+
+    <!-- 5. Downloads -->
+    <div class="vp-metric-card p-4">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-medium uppercase tracking-wider">Downloads</span>
+        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold font-mono text-white">{{ kpi.total_downloads }}</div>
+      <div class="text-[11px] text-amber-400/90 mt-1 font-medium">Secure deliveries made</div>
+    </div>
+
+    <!-- 6. Proposals Signed -->
+    <div class="vp-metric-card p-4">
+      <div class="flex items-center justify-between text-slate-400 mb-2">
+        <span class="text-xs font-medium uppercase tracking-wider">Signed Deals</span>
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div class="text-2xl font-bold font-mono text-white">{{ kpi.accepted_proposals }}</div>
+      <div class="text-[11px] text-emerald-400/90 mt-1 font-medium">Client sign-offs</div>
+    </div>
+  </div>
+
+  <!-- Primary Sections Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left 2 Cols: Active Documents & Pitch Decks -->
+    <div class="lg:col-span-2 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Active Presentations &amp; Decks
+        </h2>
+        <a href="/documents" class="text-xs font-medium text-emerald-400 hover:text-emerald-300">View all &rarr;</a>
+      </div>
+
+      <div class="vp-card overflow-hidden">
+        <div class="divide-y divide-surface-800">
+          {% for doc in documents %}
+          <div class="p-5 hover:bg-surface-850/50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1.5 flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <a href="/documents/{{ doc.id }}" class="text-base font-semibold text-white hover:text-emerald-400 transition truncate">
+                  {{ doc.title }}
+                </a>
+                
+                <!-- Access Guard Badge -->
+                {% if doc.access_type == 'email_gate' %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                  Email Gated
+                </span>
+                {% elif doc.access_type == 'passcode' %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                  </svg>
+                  Passcode
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                  Open Link
+                </span>
+                {% endif %}
+
+                {% if doc.watermark_enabled %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                  Watermarked
+                </span>
+                {% endif %}
+              </div>
+
+              <div class="flex items-center gap-4 text-xs text-slate-400">
+                <span>{{ doc.file_size | format_size }}</span>
+                <span>•</span>
+                <span>{{ doc.total_pages }} slides</span>
+                <span>•</span>
+                <span class="text-slate-300 font-mono">{{ doc.views_count }} views</span>
+                <span>•</span>
+                <span class="text-slate-300 font-mono">Avg: {{ doc.avg_duration_sec | format_duration }}</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <button onclick="copyToClipboard(window.location.origin + '/v/{{ doc.id }}')" class="p-2 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-300 hover:text-white border border-surface-700 transition" title="Copy Share Link">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+              </button>
+              <a href="/v/{{ doc.id }}" target="_blank" class="p-2 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-300 hover:text-white border border-surface-700 transition" title="Open Viewer Preview">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+              <a href="/documents/{{ doc.id }}" class="inline-flex items-center px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Dropoff Analytics
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right 1 Col: Live Activity Stream -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Live Activity Feed
+        </h2>
+        <span class="text-xs text-slate-500">Real-Time</span>
+      </div>
+
+      <div class="vp-card p-4 space-y-3">
+        {% for v in recent_visits %}
+        <div class="p-3 rounded-lg bg-surface-900/60 border border-surface-800 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-200 truncate max-w-[180px]">
+              {{ v.viewer_email }}
+            </span>
+            <span class="text-[11px] font-mono text-emerald-400">
+              {{ v.duration_seconds | format_duration }} read
+            </span>
+          </div>
+
+          <div class="text-[11px] text-slate-400 truncate">
+            {{ v.doc_title }}
+          </div>
+
+          <div class="flex items-center justify-between text-[10px] text-slate-500 pt-1">
+            <span>{{ v.device_type }}</span>
+            <span>{{ v.pages_viewed }} slides viewed</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Upload Pitch Deck Modal -->
+<div id="upload-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="vp-card bg-surface-900 border border-surface-700 max-w-lg w-full p-6 space-y-5">
+    <div class="flex items-center justify-between border-b border-surface-800 pb-4">
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+        </svg>
+        <h3 class="text-lg font-bold text-white">Upload New Presentation / Deck</h3>
+      </div>
+      <button onclick="toggleModal('upload-modal')" class="text-slate-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <form action="/api/documents/create" method="POST" enctype="multipart/form-data" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Document Title</label>
+        <input type="text" name="title" required placeholder="e.g. Q1 Investor Update & Growth Metrics" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Description (Internal Notes)</label>
+        <input type="text" name="description" placeholder="Confidential deck for Series A leads" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Access Security</label>
+          <select name="access_type" id="access_type_select" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+            <option value="email_gate">Email Gate (Verify Work Email)</option>
+            <option value="passcode">Passcode Protected</option>
+            <option value="open">Open Link (Anyone with URL)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Total Slides / Pages</label>
+          <input type="number" name="total_pages" value="6" min="1" max="100" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+        </div>
+      </div>
+
+      <div id="passcode_field" class="hidden">
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Secret Passcode</label>
+        <input type="text" name="passcode" placeholder="Enter secret code" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+      </div>
+
+      <div class="space-y-2 pt-2 border-t border-surface-800">
+        <label class="flex items-center space-x-2 text-sm text-slate-300">
+          <input type="checkbox" name="watermark_enabled" checked class="rounded bg-surface-950 border-surface-700 text-emerald-500 focus:ring-0">
+          <span>Enable Dynamic Visitor Watermarking (Anti-leak)</span>
+        </label>
+        <label class="flex items-center space-x-2 text-sm text-slate-300">
+          <input type="checkbox" name="allow_download" class="rounded bg-surface-950 border-surface-700 text-emerald-500 focus:ring-0">
+          <span>Allow PDF Download (Leave unchecked to force viewer only)</span>
+        </label>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Select PDF / Presentation File</label>
+        <input type="file" name="file" required accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-surface-800 file:text-slate-200 hover:file:bg-surface-700 cursor-pointer">
+      </div>
+
+      <div class="pt-4 flex justify-end space-x-3">
+        <button type="button" onclick="toggleModal('upload-modal')" class="px-4 py-2 rounded-lg text-sm text-slate-400 hover:text-white">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">Generate Tracked Link</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('access_type_select').addEventListener('change', function(e) {
+    const pf = document.getElementById('passcode_field');
+    if (e.target.value === 'passcode') {
+      pf.classList.remove('hidden');
+    } else {
+      pf.classList.add('hidden');
+    }
+  });
+</script>
+{% endblock %}

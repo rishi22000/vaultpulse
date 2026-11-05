@@ -1,0 +1,21 @@
+# VaultPulse Docker Compose Configuration
+# Author & Maintainer: Neelbyte Websolution
+version: '3.8'
+
+services:
+  vaultpulse:
+    build: .
+    container_name: vaultpulse
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    environment:
+      - DATABASE_PATH=/app/data/vaultpulse.db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

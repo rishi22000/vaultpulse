@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Client Proposals &amp; Sign-offs - VaultPulse{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Client Proposals &amp; Quotes
+      </h1>
+      <p class="text-sm text-slate-400 mt-1">
+        Present professional quotes with instant client e-signatures.
+      </p>
+    </div>
+
+    <button onclick="toggleModal('proposal-modal')" class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/30 transition">
+      <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Create New Proposal
+    </button>
+  </div>
+
+  <!-- Proposals List -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for p in proposals %}
+    <div class="vp-card p-6 space-y-4">
+      <div class="flex items-start justify-between gap-2 border-b border-surface-800 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-white">{{ p.project_title }}</h3>
+          <p class="text-xs text-slate-400 mt-0.5">{{ p.client_name }} ({{ p.client_email }})</p>
+        </div>
+        <div class="text-right">
+          <div class="text-base font-bold font-mono text-emerald-400">{{ p.total_amount }}</div>
+          {% if p.status == 'accepted' %}
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            Signed &amp; Approved
+          </span>
+          {% else %}
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
+            Awaiting Sign-off
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed">
+        {{ p.scope_summary }}
+      </p>
+
+      {% if p.status == 'accepted' %}
+      <div class="p-3 bg-emerald-500/5 rounded-lg border border-emerald-500/10 text-xs text-emerald-300 space-y-1">
+        <div class="font-semibold flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Digitally Signed by: {{ p.signature_name }}
+        </div>
+        <div class="text-[11px] text-slate-400 font-mono">
+          Timestamp: {{ p.accepted_at[:19].replace('T', ' ') }} UTC
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="flex items-center justify-between gap-3 pt-2">
+        <button onclick="copyToClipboard(window.location.origin + '/p/{{ p.id }}')" class="flex-1 py-2 px-3 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-300 hover:text-white border border-surface-700 text-xs font-semibold flex items-center justify-center space-x-1.5 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          <span>Copy Client Link</span>
+        </button>
+
+        <a href="/p/{{ p.id }}" target="_blank" class="py-2 px-3 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-300 hover:text-white border border-surface-700 text-xs font-semibold flex items-center justify-center transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<!-- Create Proposal Modal -->
+<div id="proposal-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="vp-card bg-surface-900 border border-surface-700 max-w-lg w-full p-6 space-y-5">
+    <div class="flex items-center justify-between border-b border-surface-800 pb-4">
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 class="text-lg font-bold text-white">Create Client Proposal</h3>
+      </div>
+      <button onclick="toggleModal('proposal-modal')" class="text-slate-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <form action="/api/proposals/create" method="POST" class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Client Company / Name</label>
+          <input type="text" name="client_name" required placeholder="Acme Global" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Client Email</label>
+          <input type="email" name="client_email" required placeholder="ceo@acme.com" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Project Title</label>
+        <input type="text" name="project_title" required placeholder="Design System & Full-Stack Rollout" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Scope &amp; Deliverables Summary</label>
+        <textarea name="scope_summary" rows="3" required placeholder="Detail key milestones, delivery timeline, and technical scope..." class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Fixed Price / Total Amount</label>
+        <input type="text" name="total_amount" required placeholder="$12,500 USD" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+      </div>
+
+      <div class="pt-4 flex justify-end space-x-3">
+        <button type="button" onclick="toggleModal('proposal-modal')" class="px-4 py-2 rounded-lg text-sm text-slate-400 hover:text-white">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">Generate Proposal</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

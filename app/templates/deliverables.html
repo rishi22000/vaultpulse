@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Asset Lockers &amp; Deliverables - VaultPulse{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        Secure Client Asset Lockers
+      </h1>
+      <p class="text-sm text-slate-400 mt-1">
+        Send large files with download quotas and passcodes. Zero WeTransfer or Dropbox monthly fees.
+      </p>
+    </div>
+
+    <button onclick="toggleModal('deliverable-modal')" class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-900/30 transition">
+      <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Create Asset Locker
+    </button>
+  </div>
+
+  <!-- Deliverables Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for dl in deliverables %}
+    <div class="vp-card p-5 flex flex-col justify-between space-y-4">
+      <div class="space-y-3">
+        <div class="flex items-start justify-between gap-2">
+          <h3 class="text-base font-bold text-white leading-snug">
+            {{ dl.title }}
+          </h3>
+          {% if dl.status == 'download_limit_reached' %}
+          <span class="text-[11px] px-2 py-0.5 rounded font-mono font-medium bg-rose-500/10 text-rose-300 border border-rose-500/20">
+            Limit Reached
+          </span>
+          {% elif dl.passcode %}
+          <span class="text-[11px] px-2 py-0.5 rounded font-mono font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
+            Locked
+          </span>
+          {% else %}
+          <span class="text-[11px] px-2 py-0.5 rounded font-mono font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+            Active
+          </span>
+          {% endif %}
+        </div>
+
+        <p class="text-xs text-slate-400 line-clamp-2">
+          {{ dl.description or "No description provided." }}
+        </p>
+
+        <!-- Quota Progress -->
+        <div class="space-y-1 pt-1">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Downloads Quota</span>
+            <span class="text-purple-400 font-semibold">{{ dl.downloads_count }} / {{ dl.max_downloads }} used</span>
+          </div>
+          {% set dl_pct = (dl.downloads_count / dl.max_downloads * 100) | round %}
+          <div class="w-full bg-surface-900 rounded-full h-2 border border-surface-800 overflow-hidden">
+            <div class="h-full bg-purple-500 rounded-full" style="width: {{ dl_pct }}%;"></div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-400 font-mono pt-1">
+          <span>{{ dl.file_size | format_size }}</span>
+          <span>Created: {{ dl.created_at[:10] }}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-surface-800">
+        <button onclick="copyToClipboard(window.location.origin + '/d/{{ dl.id }}')" class="flex-1 py-2 px-3 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-300 hover:text-white border border-surface-700 text-xs font-semibold flex items-center justify-center space-x-1.5 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          <span>Copy Link</span>
+        </button>
+
+        <a href="/d/{{ dl.id }}" target="_blank" class="py-2 px-3 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-300 hover:text-white border border-surface-700 text-xs font-semibold flex items-center justify-center transition" title="Preview Portal">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<!-- Upload Deliverable Modal -->
+<div id="deliverable-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="vp-card bg-surface-900 border border-surface-700 max-w-lg w-full p-6 space-y-5">
+    <div class="flex items-center justify-between border-b border-surface-800 pb-4">
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        <h3 class="text-lg font-bold text-white">Create Secure Asset Locker</h3>
+      </div>
+      <button onclick="toggleModal('deliverable-modal')" class="text-slate-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <form action="/api/deliverables/create" method="POST" enctype="multipart/form-data" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Deliverable Title</label>
+        <input type="text" name="title" required placeholder="e.g. Master Design Files & 4K Assets" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-purple-500 text-sm">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Description</label>
+        <input type="text" name="description" placeholder="Final client export package" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-purple-500 text-sm">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Download Quota Limit</label>
+          <input type="number" name="max_downloads" value="5" min="1" max="100" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-purple-500 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Passcode (Optional)</label>
+          <input type="text" name="passcode" placeholder="Leave empty for open" class="w-full px-3.5 py-2.5 rounded-lg bg-surface-950 border border-surface-700 text-white focus:outline-none focus:border-purple-500 text-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Select File (Zip, Video, Doc, Assets)</label>
+        <input type="file" name="file" required class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-surface-800 file:text-slate-200 hover:file:bg-surface-700 cursor-pointer">
+      </div>
+
+      <div class="pt-4 flex justify-end space-x-3">
+        <button type="button" onclick="toggleModal('deliverable-modal')" class="px-4 py-2 rounded-lg text-sm text-slate-400 hover:text-white">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white transition">Generate Secure Locker</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" class="dark h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ doc.title }} - VaultPulse Viewer</title>
+  <link rel="icon" type="image/svg+xml" href="/static/brand/icon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              950: '#06090e',
+              900: '#0c111d',
+              850: '#111827',
+              800: '#1f2937',
+              700: '#374151',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/custom.css">
+  <style>
+    .watermark-pattern {
+      background-image: repeating-linear-gradient(
+        -35deg,
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.05) 1px,
+        transparent 1px,
+        transparent 160px
+      );
+    }
+  </style>
+</head>
+<body class="bg-surface-950 text-slate-100 h-full flex flex-col overflow-hidden select-none">
+
+  {% if gate_required %}
+  <!-- ACCESS GATE OVERLAY -->
+  <div class="fixed inset-0 z-50 bg-surface-950 flex items-center justify-center p-4">
+    <div class="vp-card max-w-md w-full p-8 text-center space-y-6">
+      
+      <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 mx-auto flex items-center justify-center">
+        {% if gate_type == 'email' %}
+        <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        {% else %}
+        <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        {% endif %}
+      </div>
+
+      <div class="space-y-2">
+        <h2 class="text-xl font-bold text-white">{{ doc.title }}</h2>
+        <p class="text-xs text-slate-400">
+          {% if gate_type == 'email' %}
+          This document is protected. Please enter your work email to access the presentation.
+          {% else %}
+          This document is password protected. Enter the passcode provided by the owner.
+          {% endif %}
+        </p>
+      </div>
+
+      <form action="/api/v/{{ doc.id }}/unlock" method="POST" class="space-y-4">
+        {% if gate_type == 'email' %}
+        <div>
+          <input type="email" name="email" required placeholder="name@company.com" class="w-full px-4 py-3 rounded-lg bg-surface-900 border border-surface-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 text-center font-medium">
+        </div>
+        <button type="submit" class="w-full py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition shadow-lg shadow-emerald-900/30">
+          Access Presentation &rarr;
+        </button>
+        {% else %}
+        <div>
+          <input type="password" name="passcode" required placeholder="Enter passcode" class="w-full px-4 py-3 rounded-lg bg-surface-900 border border-surface-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-amber-500 text-center font-mono">
+        </div>
+        <button type="submit" class="w-full py-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm transition shadow-lg shadow-amber-900/30">
+          Unlock Document &rarr;
+        </button>
+        {% endif %}
+      </form>
+
+      <div class="pt-4 border-t border-surface-800 text-[11px] text-slate-500 flex items-center justify-center space-x-1">
+        <span>Powered by VaultPulse Zero-Knowledge Engine</span>
+      </div>
+    </div>
+  </div>
+  {% else %}
+
+  <!-- VIEWER HEADER -->
+  <header class="h-14 border-b border-surface-800 bg-surface-900/90 backdrop-blur px-6 flex items-center justify-between z-30">
+    <div class="flex items-center space-x-3">
+      <img src="/static/brand/icon.svg" alt="VaultPulse" class="h-6 w-6">
+      <span class="text-sm font-semibold text-white truncate max-w-sm sm:max-w-md">{{ doc.title }}</span>
+    </div>
+
+    <div class="flex items-center space-x-3">
+      {% if doc.allow_download %}
+      <a href="/v/{{ doc.id }}/download" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-surface-800 hover:bg-surface-700 text-slate-200 border border-surface-700 transition">
+        <svg class="w-3.5 h-3.5 mr-1.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Download PDF
+      </a>
+      {% endif %}
+
+      <button id="fullscreen-btn" onclick="toggleFullScreen()" class="p-1.5 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-400 hover:text-white border border-surface-700 transition" title="Fullscreen">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN SLIDE CANVAS STAGE -->
+  <main class="flex-1 relative flex items-center justify-center p-4 sm:p-8 overflow-hidden bg-surface-950" id="slide-stage">
+    
+    <!-- Dynamic Anti-Leak Watermark Layer -->
+    {% if doc.watermark_enabled and viewer_email %}
+    <div class="watermark-pattern absolute inset-0 pointer-events-none z-20 flex items-center justify-center overflow-hidden">
+      <div class="transform -rotate-25 text-slate-500/15 font-mono text-xl sm:text-2xl font-bold whitespace-nowrap tracking-widest text-center select-none pointer-events-none">
+        CONFIDENTIAL • {{ viewer_email }} • DO NOT DISTRIBUTE<br>
+        CONFIDENTIAL • {{ viewer_email }} • DO NOT DISTRIBUTE<br>
+        CONFIDENTIAL • {{ viewer_email }} • DO NOT DISTRIBUTE<br>
+        CONFIDENTIAL • {{ viewer_email }} • DO NOT DISTRIBUTE
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Slide Presentation Canvas Container -->
+    <div class="w-full max-w-5xl aspect-[16/9] bg-surface-900 border border-surface-800 rounded-2xl shadow-2xl overflow-hidden relative flex flex-col justify-between p-8 sm:p-14 z-10 transition-all duration-300">
+      
+      <!-- Slide Top Metadata -->
+      <div class="flex items-center justify-between border-b border-surface-800/80 pb-4">
+        <div class="flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs font-mono uppercase tracking-widest text-slate-400">VaultPulse Secure Slide Deck</span>
+        </div>
+        <div class="text-xs font-mono text-emerald-400 font-semibold" id="slide-indicator-top">
+          Slide 1 of {{ doc.total_pages }}
+        </div>
+      </div>
+
+      <!-- Slide Main Body (Dynamic Interactive Content) -->
+      <div class="my-auto space-y-6" id="slide-content">
+        <!-- Rendered via JS based on current page -->
+      </div>
+
+      <!-- Slide Footer Branding -->
+      <div class="flex items-center justify-between border-t border-surface-800/80 pt-4 text-xs text-slate-500">
+        <span class="font-mono">VaultPulse Verified Document</span>
+        <span>Use &larr; &rarr; Arrow keys or controls below</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTTOM CONTROL BAR -->
+  <footer class="h-16 border-t border-surface-800 bg-surface-900/90 backdrop-blur px-6 flex items-center justify-between z-30">
+    <div class="flex items-center space-x-2">
+      <button onclick="prevSlide()" class="p-2 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-200 border border-surface-700 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+
+      <span class="px-3 py-1 rounded bg-surface-950 font-mono text-xs text-slate-300 border border-surface-800" id="slide-counter">
+        1 / {{ doc.total_pages }}
+      </span>
+
+      <button onclick="nextSlide()" class="p-2 rounded-lg bg-surface-800 hover:bg-surface-700 text-slate-200 border border-surface-700 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Slide Thumbnails Pill Bar -->
+    <div class="hidden sm:flex items-center space-x-1.5" id="thumbnail-bar">
+      {% for p in range(1, doc.total_pages + 1) %}
+      <button onclick="goToSlide({{ p }})" id="pill-{{ p }}" class="px-2.5 py-1 rounded text-xs font-mono font-medium border transition {% if p == 1 %}bg-emerald-500/20 text-emerald-400 border-emerald-500/40{% else %}bg-surface-850 text-slate-400 border-surface-800 hover:bg-surface-800{% endif %}">
+        {{ p }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <!-- Reading Progress Meter -->
+    <div class="flex items-center space-x-3">
+      <div class="text-xs text-slate-400 hidden md:block">
+        Read progress: <span class="font-mono text-emerald-400" id="read-pct">12%</span>
+      </div>
+      <div class="w-24 bg-surface-950 rounded-full h-2 border border-surface-800 overflow-hidden">
+        <div id="read-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 12%;"></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DOCSEND-STYLE REAL-TIME HEARTBEAT TRACKING SCRIPT -->
+  <script>
+    const DOC_ID = "{{ doc.id }}";
+    const SESSION_ID = "{{ session_id }}";
+    const TOTAL_PAGES = {{ doc.total_pages }};
+    let currentSlide = 1;
+    let maxSlideSeen = 1;
+    let isActiveTab = true;
+
+    // Slide Titles & Visual Data for Dynamic Render
+    const slideThemes = [
+      {
+        title: "{{ doc.title }}",
+        subtitle: "Confidential Executive Presentation",
+        content: "<div class='text-slate-300 text-base leading-relaxed'>Welcome to the secure document viewer. This deck has been protected with dynamic access control and session encryption.<br><br>Use the arrow keys or the navigation bar below to review the slides.</div>"
+      },
+      {
+        title: "1. Executive Summary & Market Problem",
+        subtitle: "Current Market Inefficiencies & High SaaS Costs",
+        content: "<div class='grid grid-cols-2 gap-4 text-xs font-sans'><div class='p-4 bg-surface-950 rounded-xl border border-surface-800'><div class='text-emerald-400 font-bold mb-1'>Extreme Recurring Costs</div>Traditional enterprise tools charge $65/user/month with severe vendor lock-in.</div><div class='p-4 bg-surface-950 rounded-xl border border-surface-800'><div class='text-cyan-400 font-bold mb-1'>Data Sovereignty Risk</div>Confidential pitch decks and IP stored on third-party multi-tenant clouds.</div></div>"
+      },
+      {
+        title: "2. The Self-Hosted Infrastructure Solution",
+        subtitle: "Zero-Knowledge Architecture on Hostinger VPS",
+        content: "<div class='text-slate-300 text-sm leading-relaxed'>Deploying single-tenant nodes allows complete control over customer audit logs, zero subscription fees, and unlimited document storage on high-performance NVMe drives.</div>"
+      },
+      {
+        title: "3. Unit Economics & Growth Projections",
+        subtitle: "Customer Acquisition & LTV Metrics",
+        content: "<div class='p-4 bg-surface-950 rounded-xl border border-surface-800 font-mono text-xs space-y-2'><div class='flex justify-between'><span class='text-slate-400'>Customer LTV</span><span class='text-emerald-400 font-bold'>$3,420</span></div><div class='flex justify-between'><span class='text-slate-400'>CAC Payback</span><span class='text-white font-bold'>2.4 Months</span></div><div class='flex justify-between'><span class='text-slate-400'>Gross Margin</span><span class='text-emerald-400 font-bold'>88.4%</span></div></div>"
+      },
+      {
+        title: "4. Traction & Milestones",
+        subtitle: "Product Rollout Timeline",
+        content: "<div class='text-slate-300 text-xs space-y-2'><div class='p-2 bg-emerald-500/10 rounded border border-emerald-500/20 text-emerald-300'>Phase 1: Zero-knowledge Document Tracker & Slide Dropoff</div><div class='p-2 bg-surface-950 rounded border border-surface-800 text-slate-400'>Phase 2: Encrypted Deliverable Lockers & Auto-destruct Quotas</div><div class='p-2 bg-surface-950 rounded border border-surface-800 text-slate-400'>Phase 3: Automated Client Quotes & Proposal Sign-off</div></div>"
+      },
+      {
+        title: "5. Next Steps & Procurement",
+        subtitle: "Closing & Direct Sign-off",
+        content: "<div class='text-slate-300 text-sm leading-relaxed'>For confidential discussions, questions, or contract finalization, please reach out directly to the document owner.</div>"
+      }
+    ];
+
+    function renderSlide(index) {
+      const idx = index - 1;
+      const theme = slideThemes[idx % slideThemes.length];
+      const contentEl = document.getElementById('slide-content');
+      
+      contentEl.innerHTML = `
+        <div class="space-y-2">
+          <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">${theme.subtitle}</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">${theme.title}</h2>
+        </div>
+        <div class="pt-2">${theme.content}</div>
+      `;
+
+      document.getElementById('slide-counter').textContent = `${index} / ${TOTAL_PAGES}`;
+      document.getElementById('slide-indicator-top').textContent = `Slide ${index} of ${TOTAL_PAGES}`;
+
+      // Update pills
+      for (let p = 1; p <= TOTAL_PAGES; p++) {
+        const pill = document.getElementById(`pill-${p}`);
+        if (!pill) continue;
+        if (p === index) {
+          pill.className = "px-2.5 py-1 rounded text-xs font-mono font-medium border transition bg-emerald-500/20 text-emerald-400 border-emerald-500/40";
+        } else {
+          pill.className = "px-2.5 py-1 rounded text-xs font-mono font-medium border transition bg-surface-850 text-slate-400 border-surface-800 hover:bg-surface-800";
+        }
+      }
+
+      maxSlideSeen = Math.max(maxSlideSeen, index);
+      const pct = Math.round((maxSlideSeen / TOTAL_PAGES) * 100);
+      document.getElementById('read-pct').textContent = `${pct}%`;
+      document.getElementById('read-bar').style.width = `${pct}%`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < TOTAL_PAGES) {
+        currentSlide++;
+        renderSlide(currentSlide);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        renderSlide(currentSlide);
+      }
+    }
+
+    function goToSlide(n) {
+      if (n >= 1 && n <= TOTAL_PAGES) {
+        currentSlide = n;
+        renderSlide(currentSlide);
+      }
+    }
+
+    // Keyboard Shortcuts (DocSend standard)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+
+    // Window Focus Detection
+    window.addEventListener('focus', () => { isActiveTab = true; });
+    window.addEventListener('blur', () => { isActiveTab = false; });
+
+    // REAL-TIME HEARTBEAT SENDER (Tracks slide engagement)
+    setInterval(() => {
+      if (!isActiveTab) return; // Only count when active tab is focused
+
+      const formData = new FormData();
+      formData.append('session_id', SESSION_ID);
+      formData.append('page_number', currentSlide);
+      formData.append('seconds_active', 3);
+      formData.append('pages_seen', maxSlideSeen);
+
+      fetch(`/api/v/${DOC_ID}/heartbeat`, {
+        method: 'POST',
+        body: formData
+      }).catch(err => console.log('Heartbeat sync:', err));
+    }, 3000);
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Initial render
+    renderSlide(1);
+  </script>
+  {% endif %}
+
+</body>
+</html>

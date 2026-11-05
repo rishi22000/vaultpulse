@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" class="dark h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ deliv.title }} - Secure Asset Download</title>
+  <link rel="icon" type="image/svg+xml" href="/static/brand/icon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              950: '#06090e',
+              900: '#0c111d',
+              850: '#111827',
+              800: '#1f2937',
+              700: '#374151',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="bg-surface-950 text-slate-100 min-h-full flex flex-col justify-between p-4 sm:p-8">
+
+  <header class="flex items-center justify-between max-w-4xl mx-auto w-full py-4">
+    <div class="flex items-center space-x-3">
+      <img src="/static/brand/logo.svg" alt="VaultPulse" class="h-7 w-auto">
+      <span class="text-xs px-2.5 py-0.5 rounded font-mono font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20">
+        ENCRYPTED ASSET LOCKER
+      </span>
+    </div>
+  </header>
+
+  <main class="max-w-md w-full mx-auto my-auto">
+    <div class="vp-card p-8 space-y-6">
+
+      <div class="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 mx-auto flex items-center justify-center">
+        <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      </div>
+
+      <div class="text-center space-y-2">
+        <h1 class="text-xl font-bold text-white">{{ deliv.title }}</h1>
+        <p class="text-xs text-slate-400">{{ deliv.description or "Secure asset package ready for download." }}</p>
+      </div>
+
+      <!-- File Metadata Details -->
+      <div class="p-4 bg-surface-950 rounded-xl border border-surface-800 space-y-2 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">File Name:</span>
+          <span class="font-mono text-slate-200 font-medium truncate max-w-[200px]">{{ deliv.file_name }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">Payload Size:</span>
+          <span class="font-mono text-purple-400 font-bold">{{ deliv.file_size | format_size }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">Download Quota:</span>
+          <span class="font-mono text-slate-300">{{ deliv.max_downloads - deliv.downloads_count }} downloads remaining</span>
+        </div>
+      </div>
+
+      {% if not unlocked %}
+      <!-- Password Prompt -->
+      <form action="/api/d/{{ deliv.id }}/unlock" method="POST" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5 text-center">
+            Enter Access Passcode
+          </label>
+          <input type="password" name="passcode" required placeholder="••••••••" class="w-full px-4 py-3 rounded-lg bg-surface-900 border border-surface-700 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-purple-500 text-center font-mono tracking-widest">
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm transition shadow-lg shadow-purple-900/30">
+          Unlock Asset Locker &rarr;
+        </button>
+      </form>
+      {% elif deliv.status == 'download_limit_reached' or deliv.downloads_count >= deliv.max_downloads %}
+      <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-center text-xs text-rose-300 space-y-1">
+        <div class="font-bold">Download Limit Exceeded</div>
+        <div class="text-slate-400">This secure link was set to auto-destruct after {{ deliv.max_downloads }} downloads.</div>
+      </div>
+      {% else %}
+      <!-- Download Button -->
+      <a href="/d/{{ deliv.id }}/download" class="w-full py-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition shadow-lg shadow-emerald-900/30 flex items-center justify-center space-x-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        <span>Download Asset Package</span>
+      </a>
+      {% endif %}
+
+      <div class="text-center text-[11px] text-slate-500">
+        Direct delivery via Hostinger VPS • Zero cloud retention
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="text-center text-xs text-slate-500 py-4">
+    VaultPulse Self-Hosted Delivery Portal
+  </footer>
+
+</body>
+</html>

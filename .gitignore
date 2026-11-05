@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+env/
+venv/
+ENV/
+
+# Database & Uploads
+data/*.db
+data/*.db-shm
+data/*.db-wal
+uploads/pkg_*
+uploads/deck_*
+
+# Mac OS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# IDEs
+.idea/
+.vscode/
+*.swp
