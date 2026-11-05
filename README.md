@@ -8,9 +8,9 @@
   </p>
 
   <p align="center">
-    <!-- Hostinger 1-Click Deploy Badge -->
-    <a href="https://hostinger.com?REFERRAL_CODE=YOUR_HOSTINGER_CODE">
-      <img src="https://assets.hostinger.com/images/badges/deploy-to-hostinger.svg" alt="Deploy to Hostinger" height="38">
+    <!-- Official Hostinger Partner Badge -->
+    <a href="https://www.hostinger.com/in?REFERRALCODE=HDZRISHABI2O" target="_blank" rel="noopener noreferrer">
+      <img src="assets/hostinger/svg/Badge_brand_dark.svg" alt="Deploy to Hostinger" height="42">
     </a>
   </p>
 
@@ -57,7 +57,7 @@
 
 Deploying your own instance of VaultPulse takes under 60 seconds on Hostinger:
 
-1. Click the **[Deploy to Hostinger](https://hostinger.com?REFERRAL_CODE=YOUR_HOSTINGER_CODE)** button above.
+1. Click the **[Deploy to Hostinger](https://www.hostinger.com/in?REFERRALCODE=HDZRISHABI2O)** badge above.
 2. Select an **Ubuntu 24.04 VPS** plan (Standard VPS 1 or VPS 2).
 3. Connect via SSH and run:
 
